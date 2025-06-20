@@ -3,7 +3,7 @@
 
 ## Project Overview
 
-SeqManager is a powerful and intuitive bioinformatics file management system designed to help researchers, bioinformaticians, and lab managers efficiently manage large volumes of sequencing data. The system provides a comprehensive suite of tools to scan, classify, and identify duplicate files, all through a user-friendly web interface. By offering a clear overview of storage usage and providing a safe and easy way to delete redundant files, SeqManager helps to reduce storage costs and improve data organization.
+SeqManager is a bioinformatics file management system designed to help researchers, bioinformaticians, and lab managers efficiently manage large volumes of sequencing data. The system provides a comprehensive suite of tools to scan, classify, and identify duplicate files, all through a user-friendly web interface. By offering a clear overview of storage usage and providing a safe and easy way to delete redundant files, SeqManager helps to reduce storage costs and improve data organization.
 
 ### Key Features and Capabilities
 
@@ -20,10 +20,6 @@ SeqManager is a powerful and intuitive bioinformatics file management system des
 *   **Bioinformaticians:** Who need to manage large datasets and identify redundant files to free up storage space.
 *   **Researchers:** Who need a simple and intuitive way to manage their sequencing data without requiring advanced command-line skills.
 *   **Lab Managers:** Who are responsible for managing storage resources and ensuring data is well-organized.
-
-## Technical Architecture
-
-SeqManager is built on a modern and robust technical stack, designed for scalability and ease of use. The system is containerized using Docker, making it easy to deploy and manage.
 
 ### System Components
 
@@ -56,9 +52,6 @@ The backend provides a RESTful API for interacting with the system. The API endp
 *   `GET /api/results`: Retrieves the results of the last completed scan, including file classifications and duplicate files.
 *   `POST /api/delete`: Deletes a list of specified files.
 
-## Installation and Setup
-
-SeqManager is designed to be easy to install and run using Docker.
 
 ### Prerequisites and System Requirements
 
@@ -94,26 +87,22 @@ The SeqManager user interface is divided into four main sections:
 
 1.  **Dashboard:** Provides a high-level overview of your sequencing data, including a summary of file categories, total storage usage, and a list of the largest files.
 
-    *(Screenshot: A view of the SeqManager dashboard, showing summary charts and statistics of the scanned data.)*
 
 2.  **Scanner:** Allows you to start a new scan of a directory and monitor its progress.
 
-    *(Screenshot: The scanner view, with an input field for the directory path and a progress bar showing the scan status.)*
 
 3.  **File Categories:** Displays a detailed breakdown of your files by category, allowing you to see how much space each category is consuming.
 
-    *(Screenshot: The file categories view, with a breakdown of file types and their corresponding storage usage.)*
 
 4.  **Duplicate Files:** Lists all duplicate files found during the scan, allowing you to select and delete them.
 
-    *(Screenshot: The duplicates view, showing a list of duplicate file groups with checkboxes for selection and deletion.)*
-
+ 
 ### File Scanning Procedures
 
 To start a new scan:
 
 1.  Navigate to the **Scanner** page.
-2.  Enter the full path to the directory you want to scan in the input field.
+2.  Enter the full path to the directory you want to scan in the input field (if you used -d option, the path will start with /data).
 3.  Click the "Start Scan" button.
 
 The progress of the scan will be displayed in real-time. Once the scan is complete, you can view the results on the **Dashboard**, **File Categories**, and **Duplicate Files** pages.
