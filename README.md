@@ -301,67 +301,6 @@ if __name__ == "__main__":
     print(f"Found {len(results['duplicates'])} duplicate files.")
 ```
 
-## Security and Safety
-
-### File Deletion Safety Measures
-
-SeqManager includes several safety measures to prevent accidental data loss:
-
-*   **Confirmation Dialog:** A confirmation dialog is displayed before any files are deleted.
-*   **"Select All Duplicates (Keep First)" Button:** This button automatically selects all but the first file in each duplicate group, which helps to ensure that you don't accidentally delete all copies of a file.
-*   **No "Select All" Button for All Files:** There is no button to select all files for deletion, which helps to prevent accidental deletion of all files.
-
-### Data Privacy Considerations
-
-SeqManager is designed to be run on your local network, and it does not transmit any of your data to external servers. However, it is important to be aware of the following data privacy considerations:
-
-*   **File Paths:** The application stores the full paths to your files in its database.
-*   **File Hashes:** The application stores the MD5 hashes of your files.
-
-### Access Control Recommendations
-
-It is recommended to run SeqManager on a secure network and to restrict access to the application to authorized users.
-
-### Backup Recommendations Before Deletion
-
-**It is strongly recommended that you back up your data before deleting any files using SeqManager.** While the application includes several safety measures, it is always better to be safe than sorry.
-
-## Troubleshooting
-
-### Common Issues and Solutions
-
-*   **"Scan already in progress" error:** This error occurs when you try to start a new scan while another scan is already running. To resolve this issue, wait for the current scan to complete before starting a new one.
-*   **"Directory does not exist" error:** This error occurs when you enter an invalid directory path. To resolve this issue, make sure that the directory path you entered is correct and that the directory exists.
-*   **"Path is not a directory" error:** This error occurs when you enter a path to a file instead of a directory. To resolve this issue, make sure that you enter a valid directory path.
-
-### Performance Optimization Tips
-
-*   **Scan smaller directories:** If you have a large number of files, it is recommended to scan smaller directories individually rather than scanning the entire dataset at once.
-*   **Run scans during off-peak hours:** To minimize the impact on your system's performance, it is recommended to run scans during off-peak hours.
-
-### Error Message Explanations
-
-The application provides detailed error messages to help you troubleshoot any issues that you may encounter. If you see an error message that you do not understand, please refer to the application's logs for more information.
-
-### Support and Maintenance Guidance
-
-For support and maintenance guidance, please refer to the project's GitHub repository.
-
-## Technical Specifications
-
-### Performance Characteristics
-
-The performance of SeqManager depends on a number of factors, including the size of your dataset, the speed of your storage, and the number of CPU cores available on your system. However, the application is designed to be efficient and to minimize the impact on your system's performance.
-
-### Scalability Considerations
-
-SeqManager is designed to be scalable and to handle large datasets. The application's modular architecture and its use of a background thread for scanning allow it to handle a large number of files without impacting the performance of the user interface.
-
-### Resource Requirements
-
-*   **CPU:** 2 or more cores
-*   **RAM:** 4GB or more
-*   **Storage:** Sufficient storage space for the sequencing data you intend to manage.
 
 ### Supported Operating Systems
 
@@ -371,10 +310,3 @@ SeqManager can be run on any operating system that supports Docker, including:
 *   macOS
 *   Windows
 
-## Sources
-
-*   **[1] [file_scanner.py](file_scanner.py)** - High Reliability - Core backend script for file scanning and classification.
-*   **[2] [app.py](app.py)** - High Reliability - Main Flask application file containing the API endpoints.
-*   **[3] [App.tsx](sequencing-data-manager/src/App.tsx)** - High Reliability - Main frontend component that orchestrates the user interface.
-*   **[4] [Scanner.tsx](sequencing-data-manager/src/components/Scanner.tsx)** - High Reliability - Frontend component for the file scanning interface.
-*   **[5] [DuplicateFiles.tsx](sequencing-data-manager/src/components/DuplicateFiles.tsx)** - High Reliability - Frontend component for displaying and managing duplicate files.
