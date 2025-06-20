@@ -73,10 +73,10 @@ SeqManager is designed to be easy to install and run using Docker.
 3.  Run the following command to start the application:
 
     ```bash
-    ./run.sh
+    ./run.sh -p 3000 -d path_to_your_sequencing_data
     ```
 
-4.  Open your web browser and navigate to `http://localhost:3000` to access the SeqManager interface.
+4.  Open your web browser and navigate to `http://localhost:3000` to access the SeqManager interface. The path_to_your_sequencing_data will be mounted at /data in the directory scanner.
 
 ### Environment Configuration Options
 
