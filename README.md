@@ -1,4 +1,3 @@
-
 # SeqManager: Sequencing Data Management System - Complete Documentation
 
 ## Project Overview
