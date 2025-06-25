@@ -4,6 +4,17 @@
 
 SeqManager is a bioinformatics file management system designed to help researchers, bioinformaticians, and lab managers efficiently manage large volumes of sequencing data. The system provides a comprehensive suite of tools to scan, classify, and identify duplicate files, all through a user-friendly web interface. By offering a clear overview of storage usage and providing a safe and easy way to delete redundant files, SeqManager helps to reduce storage costs and improve data organization.
 
+### Quick Start Guide
+
+1.  Clone the repository to your local machine.
+2.  Navigate to the root directory of the project.
+3.  Run the following command to start the application:
+
+    ```bash
+    ./run.sh run -p 3000 -d path_to_your_sequencing_data
+    ```
+4.  Open your web browser and navigate to `http://localhost:3000` to access the SeqManager interface. The path_to_your_sequencing_data will be mounted at /data in the directory scanner.
+
 ### Key Features and Capabilities
 
 *   **Automated File Scanning:** Recursively scans specified directories to identify all sequencing-related files.
