@@ -13,7 +13,7 @@ SeqManager is a bioinformatics file management system designed to help researche
     ```bash
     ./run.sh run -p 3000 -d path_to_your_sequencing_data
     ```
-4.  Open your web browser and navigate to `http://localhost:3000` to access the SeqManager interface. The path_to_your_sequencing_data will be mounted at /data in the directory scanner.
+4.  Open your web browser and navigate to `http://localhost:3000` to access the SeqManager interface. The path_to_your_sequencing_data will be mounted at /data in the directory scanner. Choose the Scanner menu on the left, type "/data" in the Directory Path search bar.
 
 ### Key Features and Capabilities
 
