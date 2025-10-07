@@ -7,7 +7,7 @@ A portable web app and CLI that scans storage for sequencing data, **classifies 
 - Container: Dockerfile + docker-compose
 - Runs on macOS/Linux/Windows
 
-## ✨ Features
+## Features
 
 - **Header-based typing**: BAM (`BAM\x01`), CRAM, BCF/VCF signatures, SAM prologues, FASTQ/FASTA markers, GZIP/BGZF.
 - **Exact dedup**: size → sampled 3×64 KiB MD5 (candidate filter) → streamed **SHA-256** confirmation.
@@ -16,12 +16,12 @@ A portable web app and CLI that scans storage for sequencing data, **classifies 
 - **Erasable intermediates**: conservative suggestions (e.g., SAM when BAM/CRAM exist; BAM when CRAM exists; SRA vs FASTQ; trimmed FASTQ if raw+manifest), with commands to regenerate.
 - **Progress UI**: live status, ETA, KPIs, tables (filterable), CSV/JSON export.
 
-## 🔧 Requirements
+## Requirements
 
 - Python 3.11+ (or Docker)
 - `pip` (for local run)
 
-## 🚀 Quick start
+## Quick start
 
 ### Option A — Docker (recommended)
 
