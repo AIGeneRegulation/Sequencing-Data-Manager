@@ -1,6 +1,6 @@
 # Sequencing Data Manager
 
-A portable web app and CLI that scans storage for sequencing data, **classifies files by header bytes**, finds **exact duplicates** safely, flags **header/extension mismatches**, reports **integrity issues** (gzip CRC/BAM EOF/etc.), and suggests **erasable intermediates** with ready-to-run regeneration commands.
+A portable web app and CLI that scans storage for sequencing data, **classifies files by header bytes**, finds **exact duplicates** safely, flags **header/extension mismatches**, and suggests **erasable intermediates** with ready-to-run regeneration commands.
 
 - Backend: FastAPI (Python 3.11)
 - Frontend: single HTML/JS page (no framework)
@@ -12,7 +12,6 @@ A portable web app and CLI that scans storage for sequencing data, **classifies 
 - **Header-based typing**: BAM (`BAM\x01`), CRAM, BCF/VCF signatures, SAM prologues, FASTQ/FASTA markers, GZIP/BGZF.
 - **Exact dedup**: size → sampled 3×64 KiB MD5 (candidate filter) → streamed **SHA-256** confirmation.
 - **Mismatch report**: flags misleading filenames; ignores non-bio files unless you opt in.
-- **Integrity report**: gzip **CRC/ISIZE**, **BAM EOF BGZF** presence, truncation/interior-corruption heuristics, lightweight FASTQ structure checks.
 - **Erasable intermediates**: conservative suggestions (e.g., SAM when BAM/CRAM exist; BAM when CRAM exists; SRA vs FASTQ; trimmed FASTQ if raw+manifest), with commands to regenerate.
 - **Progress UI**: live status, ETA, KPIs, tables (filterable), CSV/JSON export.
 
