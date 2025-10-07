@@ -1,0 +1,10 @@
+version: "3.8"
+services:
+  seqmanager:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      SCAN_ROOT: /data
+    volumes:
+      - "${DATA_PATH:-./sample_data}:/data:ro"

@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>SeqManager — Storage Scanner</title>
+<style>
+  :root{
+    --fg:#0f172a; --muted:#475569; --bg:#f8fafc; --card:#ffffff; --accent:#2563eb;
+    --ok:#16a34a; --warn:#d97706; --err:#dc2626; --bar:#10b981; --chip:#e2e8f0;
+  }
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  header{padding:16px 20px;background:#fff;border-bottom:1px solid #e5e7eb;position:sticky;top:0;z-index:10}
+  h1{margin:0;font-size:18px}
+  main{max-width:1100px;margin:18px auto;padding:0 16px 48px}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0 16px}
+  input[type=text]{padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;min-width:420px;background:#fff}
+  button{padding:10px 14px;border-radius:8px;border:1px solid #cbd5e1;background:#fff;cursor:pointer}
+  button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  button:disabled{opacity:.6;cursor:not-allowed}
+  label.chk{display:flex;align-items:center;gap:6px;color:var(--muted)}
+  .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:6px 0 18px}
+  .card{background:var(--card);border:1px solid #e5e7eb;border-radius:12px;padding:14px}
+  .k{font-size:12px;color:var(--muted)} .v{font-size:18px;font-weight:700;margin-top:2px}
+  .status{display:flex;align-items:center;gap:10px;margin:8px 0;color:var(--muted)}
+  .bar{height:10px;border-radius:999px;background:#e2e8f0;overflow:hidden}
+  .fill{height:100%;width:0%;background:var(--bar);transition:width .12s linear}
+  .tabs{display:flex;gap:6px;margin:8px 0 14px}
+  .tab{padding:8px 10px;border-radius:999px;background:var(--chip);cursor:pointer;color:#111827}
+  .tab.active{background:#111827;color:#fff}
+  .table{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden}
+  th,td{padding:10px 12px;border-bottom:1px solid #f1f5f9;font-size:13px}
+  th{background:#f8fafc;text-align:left;color:#0f172a} tr:last-child td{border-bottom:none}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  .muted{color:var(--muted)} .right{text-align:right}
+  details{background:#fafafa;border:1px dashed #e5e7eb;border-radius:10px;padding:8px 10px}
+  summary{cursor:pointer;font-weight:600}
+  .toolbar{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin:8px 0}
+  .pill{padding:2px 8px;border-radius:999px;background:var(--chip);font-size:12px}
+  @media (max-width:900px){ .kpis{grid-template-columns:repeat(2,1fr)} input[type=text]{min-width:280px} }
+</style>
+</head>
+<body>
+<header><h1>SeqManager — Storage Scanner</h1></header>
+<main>
+  <section class="card">
+    <div class="row">
+      <input id="root" type="text" placeholder="/data or local path" value="/data" />
+      <label class="chk"><input id="strict" type="checkbox" checked> strict header checks</label>
+      <button id="scan" class="primary">▶︎ Scan</button>
+      <span id="hint" class="muted">Docker: use <span class="mono">/data</span> (your <span class="mono">$DATA_PATH</span>)</span>
+    </div>
+    <div class="status">
+      <strong id="phase">Idle</strong>
+      <span id="detail" class="muted"></span>
+      <span class="pill" id="eta" hidden>ETA —</span>
+    </div>
+    <div class="bar"><div id="bar" class="fill"></div></div>
+  </section>
+
+  <section class="kpis">
+    <div class="card"><div class="k">Files scanned</div><div id="k-files" class="v">—</div></div>
+    <div class="card"><div class="k">Elapsed</div><div id="k-time" class="v">—</div></div>
+    <div class="card"><div class="k">Duplicate groups</div><div id="k-groups" class="v">—</div></div>
+    <div class="card"><div class="k">Reclaimable (est.)</div><div id="k-save" class="v">—</div></div>
+  </section>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="overview">Overview</div>
+    <div class="tab" data-tab="mismatches">Header/Extension Mismatches</div>
+    <div class="tab" data-tab="duplicates">Exact Duplicates</div>
+    <div class="tab" data-tab="files">All Files</div>
+    <div class="tab" data-tab="erasable">Erasable Intermediates</div>
+  </div>
+
+  <section id="view-overview" class="card">
+    <p class="muted">Run a scan to populate results. You can export JSON/CSV from the toolbar in each tab.</p>
+  </section>
+
+  <section id="view-mismatches" class="card" hidden>
+    <div class="toolbar">
+      <input id="mm-filter" type="text" placeholder="Filter by path…" />
+      <button id="mm-export">Export CSV</button>
+    </div>
+    <table class="table" id="mm-table">
+      <thead><tr><th>Path</th><th>Extension</th><th>Header type</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <section id="view-duplicates" class="card" hidden>
+    <div class="toolbar">
+      <button id="du-export">Export CSV</button>
+      <span class="pill" id="du-summary">—</span>
+    </div>
+    <table class="table" id="du-table">
+      <thead>
+        <tr><th>SHA-256</th><th class="right">Count</th><th class="right">Group size</th><th>Files (expand)</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <section id="view-files" class="card" hidden>
+    <div class="toolbar">
+      <input id="fi-filter" type="text" placeholder="Filter by path or type…" />
+      <button id="fi-export">Export JSON</button>
+    </div>
+    <table class="table" id="fi-table">
+      <thead><tr><th>Path</th><th class="right">Size</th><th>Type</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <section id="view-erasable" class="card" hidden>
+    <div class="toolbar">
+      <button id="er-export">Export CSV</button>
+      <span class="pill" id="er-summary">—</span>
+    </div>
+    <table class="table" id="er-table">
+      <thead>
+        <tr>
+          <th>Path</th>
+          <th>Reason</th>
+          <th>Fidelity</th>
+          <th>Depends on</th>
+          <th>Regeneration command</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+</main>
+
+<script>
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const fmtBytes = b => {
+  if (b == null) return "—";
+  const u = ["B","KB","MB","GB","TB","PB"]; let i=0, x=Number(b);
+  while (x >= 1024 && i < u.length-1){ x/=1024; i++; } return (x<10?x.toFixed(2):x<100?x.toFixed(1):x.toFixed(0))+" "+u[i];
+};
+const fmtSecs = s => s==null?"—":(s<60?`${s.toFixed(1)}s`:(s/60<60?`${(s/60).toFixed(1)}m`:`${(s/3600).toFixed(1)}h`));
+const setBar = p => $("#bar").style.width = Math.max(0, Math.min(100, p)) + "%";
+const setPhase = (t, small="") => { $("#phase").textContent=t; $("#detail").textContent=small; };
+
+let startTs = 0, result = null;
+
+function activateTab(name){
+  $$(".tab").forEach(t=>t.classList.toggle("active", t.dataset.tab===name));
+  ["overview","mismatches","duplicates","files","erasable"].forEach(v => {
+    $("#view-"+v).hidden = (v!==name);
+  });
+}
+$$(".tab").forEach(t => t.addEventListener("click", () => activateTab(t.dataset.tab)));
+
+$("#scan").addEventListener("click", async () => {
+  const root = $("#root").value || "/data";
+  const strict = $("#strict").checked;
+  $("#scan").disabled = true; setBar(0); startTs = performance.now(); result = null;
+  activateTab("overview");
+  setPhase("Starting…"); $("#eta").hidden = false; $("#eta").textContent = "ETA —";
+
+  const start = await fetch("/api/scan/start",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({root, strict})});
+  const sjson = await start.json().catch(()=>({}));
+  if(!start.ok){ setPhase("Error", JSON.stringify(sjson)); $("#scan").disabled=false; $("#eta").hidden=true; return; }
+  const job = sjson.job_id;
+
+  const resp = await fetch(`/api/scan/stream/${job}`);
+  if(!resp.ok || !resp.body){ setPhase("Stream error"); $("#scan").disabled=false; $("#eta").hidden=true; return; }
+  const rd = resp.body.getReader(); const dec = new TextDecoder(); let buf="";
+  while(true){
+    const {done, value} = await rd.read(); if(done) break;
+    buf += dec.decode(value,{stream:true});
+    const frames = buf.split("\n\n"); buf = frames.pop() || "";
+    for(const fr of frames){
+      const line = fr.split("\n").find(l => l.startsWith("data:")); if(!line) continue;
+      const evt = JSON.parse(line.slice(5).trim());
+      if(evt.stage==="classify"){
+        const scanned = evt.scanned||0, total = evt.total||0;
+        const pct = total? (scanned/total)*100 : 0;
+        const elapsed = (performance.now()-startTs)/1000;
+        const rate = scanned/Math.max(1,elapsed);
+        const eta = total? (total-scanned)/Math.max(1,rate) : 0;
+        setPhase("Scanning…", `${scanned}/${total||"?"}` + (evt.path?` — ${evt.path}`:""));
+        setBar(pct);
+        $("#eta").textContent = `ETA ${eta<1?"<1s":fmtSecs(eta)}`;
+      } else if(evt.stage && evt.stage.startsWith("dedup")) {
+        setPhase("De-duplication", evt.stage.replace("dedup_",""));
+      } else if(evt.stage==="done"){
+        $("#eta").hidden = true;
+        setPhase("Done", "");
+        setBar(100); result = evt.result; hydrate(result);
+        $("#scan").disabled = false;
+      } else if(evt.stage==="error"){
+        $("#eta").hidden = true;
+        setPhase("Error", evt.error||"");
+        $("#scan").disabled = false; setBar(0);
+      }
+    }
+  }
+});
+
+function hydrate(res){
+  // KPIs
+  $("#k-files").textContent = res.n_files ?? "—";
+  const wall = res.stats?.wall_clock_s ?? null;
+  $("#k-time").textContent = fmtSecs(wall);
+  const groups = res.duplicate_groups || [];
+  $("#k-groups").textContent = groups.length;
+  const reclaim = groups.reduce((a,g)=> a + (g.total_size/Math.max(1,g.count))*(g.count-1), 0);
+  $("#k-save").textContent = fmtBytes(reclaim);
+
+  // Overview
+  $("#view-overview").innerHTML = `
+    <div><strong>Summary</strong></div>
+    <ul>
+      <li><span class="muted">Files scanned:</span> <strong>${res.n_files}</strong></li>
+      <li><span class="muted">Elapsed:</span> <strong>${fmtSecs(wall)}</strong></li>
+      <li><span class="muted">Header/extension mismatches:</span> <strong>${(res.mismatches||[]).length}</strong></li>
+      <li><span class="muted">Duplicate groups:</span> <strong>${groups.length}</strong> — <span class="muted">Est. reclaim:</span> <strong>${fmtBytes(reclaim)}</strong></li>
+      <li><span class="muted">Erasable intermediates:</span> <strong>${(res.erasable_candidates||[]).length}</strong></li>
+    </ul>
+    <div class="toolbar">
+      <button onclick="downloadJSON()">Download JSON</button>
+      <button onclick="copyJSON()">Copy JSON</button>
+    </div>
+  `;
+
+  // Mismatches
+  const mm = res.mismatches||[];
+  const mmBody = $("#mm-table tbody");
+  mmBody.innerHTML = mm.map(m => `
+    <tr>
+      <td class="mono">${m.path}</td>
+      <td>${m.extension||"—"}</td>
+      <td>${m.header_type||"—"}</td>
+    </tr>`).join("") || `<tr><td colspan="3" class="muted">None</td></tr>`;
+  $("#mm-filter").value = "";
+  $("#mm-filter").oninput = () => filterTable("mm-table", $("#mm-filter").value);
+
+  // Duplicates
+  const duBody = $("#du-table tbody");
+  duBody.innerHTML = groups.map(g => {
+    const fileList = g.files.map(p=>`<div class="mono">${p}</div>`).join("");
+    return `
+      <tr>
+        <td class="mono">${g.sha256}</td>
+        <td class="right">${g.count}</td>
+        <td class="right">${fmtBytes(g.total_size)}</td>
+        <td><details><summary>Show files</summary>${fileList}</details></td>
+      </tr>`;
+  }).join("") || `<tr><td colspan="4" class="muted">No exact duplicates found</td></tr>`;
+  $("#du-summary").textContent = groups.length ? `${groups.length} groups · est. reclaim ${fmtBytes(reclaim)}` : "—";
+
+  // Files
+  const filesBody = $("#fi-table tbody");
+  const files = res.files||[];
+  filesBody.innerHTML = files.slice(0, 50000).map(f => `
+    <tr>
+      <td class="mono">${f.path}</td>
+      <td class="right">${fmtBytes(f.size)}</td>
+      <td>${f.header_type||"—"}</td>
+    </tr>`).join("") || `<tr><td colspan="3" class="muted">None</td></tr>`;
+  $("#fi-filter").value = "";
+  $("#fi-filter").oninput = () => filterTable("fi-table", $("#fi-filter").value);
+
+  // Erasable Intermediates
+  const ers = res.erasable_candidates || [];
+  $("#er-summary").textContent = ers.length ? `${ers.length} candidates` : "—";
+  const erBody = $("#er-table tbody");
+  erBody.innerHTML = ers.map(e => `
+    <tr>
+      <td class="mono">${e.path}</td>
+      <td>${e.reason}</td>
+      <td class="muted">${e.fidelity || ""}</td>
+      <td class="mono">${(e.depends_on||[]).join("<br>")}</td>
+      <td><details><summary>Show</summary><pre class="mono" style="white-space:pre-wrap">${e.regen_cmd||""}</pre></details></td>
+    </tr>`).join("") || `<tr><td colspan="5" class="muted">No erasable intermediates found.</td></tr>`;
+  $("#er-export").onclick = () => {
+    const rows = ers.map(e => ({
+      path: e.path, reason: e.reason, fidelity: e.fidelity || "",
+      depends_on: (e.depends_on||[]).join(" | "), regen_cmd: e.regen_cmd || ""
+    }));
+    const csv = toCSV(rows, ["path","reason","fidelity","depends_on","regen_cmd"]);
+    const blob = new Blob([csv], {type:"text/csv"});
+    const a = Object.assign(document.createElement("a"), {href: URL.createObjectURL(blob), download:"erasable_intermediates.csv"});
+    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(a.href);
+  };
+}
+
+function filterTable(tableId, q){
+  q = (q||"").toLowerCase();
+  const rows = $(`#${tableId} tbody`).rows;
+  for(const r of rows){
+    const txt = r.innerText.toLowerCase();
+    r.style.display = txt.includes(q) ? "" : "none";
+  }
+}
+function downloadJSON(){
+  if(!result) return;
+  const blob = new Blob([JSON.stringify(result,null,2)], {type:"application/json"});
+  const a = Object.assign(document.createElement("a"), {href: URL.createObjectURL(blob), download:"seqmanager_result.json"});
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(a.href);
+}
+function toCSV(rows, headers){
+  const esc = v => `"${String(v??"").replaceAll('"','""')}"`;
+  return [headers.map(esc).join(",")].concat(rows.map(r => headers.map(h => esc(r[h])).join(","))).join("\n");
+}
+function copyJSON(){
+  if(!result) return;
+  navigator.clipboard.writeText(JSON.stringify(result,null,2)).then(()=>{
+    $("#view-overview").insertAdjacentHTML("beforeend", `<div class="muted">Copied to clipboard ✓</div>`);
+  });
+}
+</script>
+</body>
+</html>
