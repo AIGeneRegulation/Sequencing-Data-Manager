@@ -22,8 +22,6 @@ A portable web app and CLI that scans storage for sequencing data, **classifies 
 
 ##  Quick start
 
-### Option A — Docker (recommended)
-
 ```bash
 # 1) Clone this repo
 git clone https://github.com/AIGeneRegulation/Sequencing-Data-Manager.git
