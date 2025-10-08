@@ -59,3 +59,5 @@ Enter the full local path you want to scan (e.g., /Users/you/project/data)
 
 prints JSON to stdout or writes to a file with --json
 python -m app.backend.scanner /path/to/scan --json result.json
+
+
