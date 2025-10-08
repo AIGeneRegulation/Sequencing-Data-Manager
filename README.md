@@ -18,7 +18,7 @@ A portable web app and CLI that scans storage for sequencing data, **classifies 
 ##  Requirements
 
 - Python 3.11+ (or Docker)
-- `pip` (for local run)
+- pip (to run locally)
 
 ##  Quick start
 
