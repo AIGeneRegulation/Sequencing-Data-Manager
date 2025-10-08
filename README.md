@@ -22,7 +22,6 @@ A portable web app and CLI that scans storage for sequencing data, **classifies 
 
 ##  Quick start
 
-```bash
 # 1) Clone this repo
 git clone https://github.com/AIGeneRegulation/Sequencing-Data-Manager.git
 cd Sequencing-Data-Manager
@@ -37,3 +36,26 @@ docker compose up --build -d
 # 4) Open the UI
 # http://localhost:5000
 # In the "Root path" box, use /data (or /data/subfolder), which maps to $DATA_PATH inside the container.
+
+## Without docker
+
+# 1) Clone
+git clone https://github.com/AIGeneRegulation/Sequencing-Data-Manager.git
+cd Sequencing-Data-Manager
+
+# 2) Create venv and install deps
+python -m venv .venv
+source .venv/bin/activate                # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+
+# 3) Run the app
+uvicorn app.backend.main:app --reload --port 5000
+
+# 4) Open the UI
+# http://localhost:5000
+# Enter the full local path you want to scan (e.g., /Users/you/project/data)
+
+## CLI
+
+# prints JSON to stdout or writes to a file with --json
+python -m app.backend.scanner /path/to/scan --json result.json
